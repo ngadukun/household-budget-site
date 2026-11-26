@@ -1,77 +1,110 @@
-// NestEgg — household budget site entrypoint (make.fun program/v1 harness).
+// NestEgg — household budget site, make.fun entrypoint.
 //
-// Run with: node main.ts
-// The grader runs this file with Node 22. It copies the static site into the
-// output directory and writes a dossier.json describing the entry.
-//
-// Behaviour:
-//   - Output directory comes from MAKEFUN_OUTPUT_DIR, falling back to ./out.
-//   - Only reads files from the repository; only writes into the output dir,
-//     so it works when the repository itself is read-only and the output
-//     directory lives somewhere else entirely.
-//   - Zero dependencies, plain TypeScript using only erasable syntax.
+// Run by the grader as `node main.ts` (Node 22). Copies the static site
+// from this repository into the output directory and writes dossier.json
+// describing it. No dependencies, only Node built-ins.
 
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = process.cwd();
-const outputDir = resolve(process.env.MAKEFUN_OUTPUT_DIR ?? "./out");
+// The repository root is derived from this script's own location, never
+// from process.cwd(): the grader launches us from a different working
+// directory, so the current directory cannot be trusted to be the repo.
+const repoRoot: string = path.dirname(fileURLToPath(import.meta.url));
 
-const siteFiles = ["index.html", "app.js", "styles.css"];
-const screenshotDir = "screenshots";
+// Output directory from the environment, falling back to ./out relative
+// to the directory the program was launched from.
+const outputDir: string =
+  process.env.MAKEFUN_OUTPUT_DIR ?? path.join(process.cwd(), "out");
 
-function fail(message: string): never {
-  console.error(`main.ts: ${message}`);
-  process.exit(1);
+interface SiteFile {
+  src: string;
+  dest: string;
+  role: string;
 }
 
+const siteFiles: SiteFile[] = [
+  {
+    src: "index.html",
+    dest: "index.html",
+    role: "Page markup for the household budget site.",
+  },
+  {
+    src: "app.js",
+    dest: "app.js",
+    role: "Application logic for transactions, budgets, bills, savings goals and charts.",
+  },
+  {
+    src: "styles.css",
+    dest: "styles.css",
+    role: "Styling for the household budget site.",
+  },
+];
+
+const screenshotDir = "screenshots";
+
 function main(): void {
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  // Copy the three site files into the output directory.
   for (const file of siteFiles) {
-    const source = join(repoRoot, file);
-    if (!existsSync(source)) fail(`missing required site file: ${file}`);
-  }
-  const screenshotsSource = join(repoRoot, screenshotDir);
-  if (!existsSync(screenshotsSource) || !statSync(screenshotsSource).isDirectory()) {
-    fail(`missing required screenshots directory: ${screenshotDir}/`);
+    fs.copyFileSync(path.join(repoRoot, file.src), path.join(outputDir, file.dest));
   }
 
-  mkdirSync(outputDir, { recursive: true });
-
-  for (const file of siteFiles) {
-    cpSync(join(repoRoot, file), join(outputDir, file));
+  // Copy the whole screenshots directory (desktop and mobile PNGs).
+  const srcShots: string = path.join(repoRoot, screenshotDir);
+  const destShots: string = path.join(outputDir, screenshotDir);
+  fs.mkdirSync(destShots, { recursive: true });
+  const shotNames: string[] = fs
+    .readdirSync(srcShots)
+    .filter((name: string) => name.toLowerCase().endsWith(".png"))
+    .sort();
+  for (const name of shotNames) {
+    fs.copyFileSync(path.join(srcShots, name), path.join(destShots, name));
   }
-  cpSync(screenshotsSource, join(outputDir, screenshotDir), { recursive: true });
 
-  // Sanity-check the copy before writing the dossier: the grader must be
-  // able to open the entry file from the output directory.
-  for (const file of [...siteFiles, ...readdirSync(join(outputDir, screenshotDir)).map((n) => `${screenshotDir}/${n}`)]) {
-    if (!existsSync(join(outputDir, file))) fail(`copy failed, missing in output: ${file}`);
+  // Verify every required file actually landed in the output directory
+  // before writing the dossier.
+  const required: string[] = [
+    ...siteFiles.map((f: SiteFile) => f.dest),
+    ...shotNames.map((n: string) => path.join(screenshotDir, n)),
+  ];
+  const missing: string[] = required.filter(
+    (rel: string) => !fs.existsSync(path.join(outputDir, rel)),
+  );
+  if (missing.length > 0) {
+    console.error(
+      `NestEgg: missing output file(s) in ${outputDir}: ${missing.join(", ")} (repo root: ${repoRoot})`,
+    );
+    process.exit(1);
   }
-
-  const screenshotFiles = readdirSync(join(outputDir, screenshotDir))
-    .filter((name) => statSync(join(outputDir, screenshotDir, name)).isFile())
-    .sort()
-    .map((name) => `${screenshotDir}/${name}`);
 
   const dossier = {
     name: "NestEgg",
     description:
-      "NestEgg is a household budget site that helps a family plan a month, track every transaction, and see where the money actually goes: it shows a monthly income-versus-spending summary, lets you set a budget per category and watch it fill up, records transactions and recurring bills, tracks savings goals, and draws simple hand-rolled charts of spending over time, all in the browser with data kept locally.",
+      "NestEgg helps a household plan a month, track its transactions, set a budget for each spending category, keep on top of recurring bills, watch its savings goals, and draw simple charts, with all data stored locally in the browser.",
     entry: "index.html",
-    screenshots: screenshotFiles,
+    screenshots: shotNames.map((n: string) => path.join(screenshotDir, n)),
     files: [
-      { path: "index.html", role: "Page markup: the budget dashboard layout, forms and containers the app fills in." },
-      { path: "app.js", role: "Application logic: monthly summary, category budgets, transactions, bills, savings goals, charts and localStorage persistence." },
-      { path: "styles.css", role: "Styling for the whole site: layout, cards, forms and responsive rules." },
-      { path: "screenshots/desktop.png", role: "Desktop screenshot of the site." },
-      { path: "screenshots/mobile.png", role: "Mobile screenshot of the site." },
+      ...siteFiles.map((f: SiteFile) => ({ path: f.dest, role: f.role })),
+      ...shotNames.map((n: string) => ({
+        path: path.join(screenshotDir, n),
+        role: n.toLowerCase().includes("mobile")
+          ? "Mobile screenshot of the household budget site."
+          : "Desktop screenshot of the household budget site.",
+      })),
     ],
   };
 
-  writeFileSync(join(outputDir, "dossier.json"), JSON.stringify(dossier, null, 2) + "\n", "utf8");
+  fs.writeFileSync(
+    path.join(outputDir, "dossier.json"),
+    JSON.stringify(dossier, null, 2) + "\n",
+    "utf8",
+  );
 
-  console.log(`NestEgg: copied ${siteFiles.length} files and ${screenshotFiles.length} screenshot(s) to ${outputDir}`);
-  console.log("NestEgg: wrote dossier.json");
+  console.log(`NestEgg: site copied to ${outputDir}`);
+  console.log(`NestEgg: dossier.json written (${required.length} site files)`);
 }
 
 main();
