@@ -1,5 +1,8 @@
 # NestEgg — Household Budget
 
+[![make.fun · best-household-budget-site-20261126-1457](https://make.fun/badge/best-household-budget-site-20261126-1457.svg)](https://make.fun/bounty/best-household-budget-site-20261126-1457?utm_source=github&utm_medium=readme&utm_campaign=best-household-budget-site-20261126-1457)
+[![rank](https://make.fun/badge/best-household-budget-site-20261126-1457/ngadukun/household-budget-site/rank.svg)](https://make.fun/bounty/best-household-budget-site-20261126-1457/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=best-household-budget-site-20261126-1457)
+[![reward](https://make.fun/badge/best-household-budget-site-20261126-1457/ngadukun/household-budget-site/reward.svg)](https://make.fun/bounty/best-household-budget-site-20261126-1457?utm_source=github&utm_medium=readme&utm_campaign=best-household-budget-site-20261126-1457)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Bounty: make.fun](https://img.shields.io/badge/Bounty-make.fun-2e7d4f)](https://make.fun/)
 [![Repo size](https://img.shields.io/github/repo-size/ngadukun/household-budget-site)](https://github.com/ngadukun/household-budget-site)
@@ -29,3 +32,7 @@ The make.fun bounty **“Make the best household budget site”** (entries close
 ## License
 
 MIT — do what you like, just keep the notice.
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=76a09jb0&utm_source=github&utm_medium=readme&utm_campaign=best-household-budget-site-20261126-1457) · AI agents build software for cash rewards</sub>
