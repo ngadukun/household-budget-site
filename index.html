@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestEgg — Household Budget</title>
+<meta name="description" content="NestEgg is a simple, beautiful household budget planner: track income, spending, bills and savings goals in one place.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🥚</span>
+    <div>
+      <h1>NestEgg</h1>
+      <p class="tagline">Household budget, made simple</p>
+    </div>
+  </div>
+  <div class="month-nav">
+    <button id="prevMonth" aria-label="Previous month">‹</button>
+    <span id="monthLabel">November 2026</span>
+    <button id="nextMonth" aria-label="Next month">›</button>
+  </div>
+  <button id="resetBtn" class="btn ghost small" title="Restore the sample household">Reset demo data</button>
+</header>
+
+<main>
+  <section class="summary" aria-label="Monthly summary">
+    <div class="card stat income">
+      <span class="stat-label">Income this month</span>
+      <strong id="statIncome">$0</strong>
+      <span class="stat-sub" id="statIncomeSub"></span>
+    </div>
+    <div class="card stat spending">
+      <span class="stat-label">Spent this month</span>
+      <strong id="statSpent">$0</strong>
+      <span class="stat-sub" id="statSpentSub"></span>
+    </div>
+    <div class="card stat balance">
+      <span class="stat-label">Left to spend</span>
+      <strong id="statLeft">$0</strong>
+      <span class="stat-sub" id="statLeftSub"></span>
+    </div>
+    <div class="card stat savings">
+      <span class="stat-label">Saved towards goals</span>
+      <strong id="statSaved">$0</strong>
+      <span class="stat-sub" id="statSavedSub"></span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card chart-card">
+      <h2>Where the money goes</h2>
+      <div class="donut-wrap">
+        <svg id="donut" viewBox="0 0 200 200" role="img" aria-label="Spending by category chart"></svg>
+        <div class="donut-center"><strong id="donutTotal">$0</strong><span>spent</span></div>
+      </div>
+      <ul id="legend" class="legend"></ul>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Spending trend — last 6 months</h2>
+      <svg id="bars" viewBox="0 0 420 190" role="img" aria-label="Monthly spending bar chart"></svg>
+      <p class="hint">Bars show total spending per month. Switch months above to inspect any month in detail.</p>
+    </div>
+  </section>
+
+  <section class="grid two-col">
+    <div class="card">
+      <div class="card-head">
+        <h2>Budget categories</h2>
+        <button id="addCategoryBtn" class="btn small">+ Category</button>
+      </div>
+      <div id="budgetList"></div>
+      <p class="hint">Tap a category bar to filter its transactions below.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Savings goals</h2>
+        <button id="addGoalBtn" class="btn small">+ Goal</button>
+      </div>
+      <div id="goalList"></div>
+    </div>
+  </section>
+
+  <section class="grid two-col">
+    <div class="card">
+      <div class="card-head">
+        <h2>Transactions</h2>
+        <button id="addTxBtn" class="btn primary small">+ Add transaction</button>
+      </div>
+      <div class="filters">
+        <input id="searchTx" type="search" placeholder="Search transactions…" aria-label="Search transactions">
+        <select id="filterCat" aria-label="Filter by category"><option value="">All categories</option></select>
+      </div>
+      <ul id="txList" class="tx-list"></ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Recurring bills</h2>
+        <button id="addBillBtn" class="btn small">+ Bill</button>
+      </div>
+      <ul id="billList" class="bill-list"></ul>
+      <p class="hint" id="billsHint"></p>
+      <h2 class="subhead">Quick insights</h2>
+      <ul id="insights" class="insights"></ul>
+    </div>
+  </section>
+</main>
+
+<div id="modalBackdrop" class="modal-backdrop hidden">
+  <form id="modalForm" class="modal" autocomplete="off">
+    <h2 id="modalTitle">Add transaction</h2>
+    <div id="modalFields"></div>
+    <div class="modal-actions">
+      <button type="button" id="modalCancel" class="btn ghost">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
+  </form>
+</div>
+
+<footer>
+  <p>NestEgg — your data never leaves this browser. Built for the make.fun “best household budget site” bounty.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
